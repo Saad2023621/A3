@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sales Data Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        #vis { width: 100%; }
+    </style>
+</head>
+<body>
+    <h1>Interactive Sales Analysis</h1>
+    <p>This visualization allows you to explore sales data by Product Line and Deal Size.</p>
+    <div id="vis"></div>
+
+    <script>
+        const vlSpec = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "data": {"url": "sales_data_sample.csv"},
+            "vconcat": [
+                {
+                    "title": "Sales by Product Line (Filter & Reconfigure)",
+                    "params": [
+                        {"name": "brush", "select": "interval", "encodings": ["x"]},
+                        {
+                            "name": "y_axis",
+                            "value": "SALES",
+                            "bind": {"input": "select", "options": ["SALES", "QUANTITYORDERED"], "name": "Metric: "}
+                        }
+                    ],
+                    "mark": "bar",
+                    "encoding": {
+                        "x": {"field": "PRODUCTLINE", "type": "nominal"},
+                        "y": {"field": {"expr": "y_axis"}, "type": "quantitative", "aggregate": "sum"},
+                        "color": {"field": "DEALSIZE", "type": "nominal"},
+                        "tooltip": [{"field": "PRODUCTLINE"}, {"field": "SALES", "aggregate": "sum"}]
+                    }
+                },
+                {
+                    "title": "Detailed Sales View (Select, Connect, Elaborate)",
+                    "transform": [{"filter": {"param": "brush"}}],
+                    "mark": "point",
+                    "encoding": {
+                        "x": {"field": "PRICEEACH", "type": "quantitative"},
+                        "y": {"field": "SALES", "type": "quantitative"},
+                        "color": {"field": "COUNTRY", "type": "nominal"},
+                        "tooltip": ["ORDERNUMBER", "CUSTOMERNAME", "SALES", "STATUS"]
+                    }
+                }
+            ],
+            "config": {}
+        };
+
+        vegaEmbed('#vis', vlSpec);
+    </script>
+</body>
+</html>
